@@ -1,0 +1,78 @@
+name: LinkedIn Auto Post
+
+on:
+  push:
+    branches:
+      - main   # troque para o nome da sua branch principal, se for outra
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'scripts/**'
+      - 'README.md'
+      # ^ isso faz o push de SETUP (adicionar esses arquivos) não gerar post.
+      # Só dispara quando o push mexer em código do projeto de verdade.
+
+jobs:
+  # ---------------------------------------------------------------
+  # JOB 1 - Gera o rascunho do post com IA e mostra para revisão
+  # ---------------------------------------------------------------
+  generate-draft:
+    runs-on: ubuntu-latest
+    outputs:
+      has_draft: ${{ steps.gen.outputs.has_draft }}
+    steps:
+      - name: Checkout com histórico completo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Gerar rascunho do post
+        id: gen
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
+          REPO_NAME: ${{ github.repository }}
+        run: node scripts/generate-draft.mjs
+
+      - name: Mostrar rascunho no Summary
+        run: cat draft.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload do rascunho como artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linkedin-draft
+          path: |
+            draft.md
+            draft.txt
+
+  # ---------------------------------------------------------------
+  # JOB 2 - Espera aprovação manual (environment protection) e publica
+  # ---------------------------------------------------------------
+  publish:
+    needs: generate-draft
+    runs-on: ubuntu-latest
+    environment: linkedin-approval   # <-- configure esse Environment no repo (passo a passo no README)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Baixar rascunho aprovado
+        uses: actions/download-artifact@v4
+        with:
+          name: linkedin-draft
+
+      - name: Publicar no LinkedIn
+        env:
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_PERSON_URN: ${{ secrets.LINKEDIN_PERSON_URN }}
+        run: node scripts/publish-linkedin.mjs
