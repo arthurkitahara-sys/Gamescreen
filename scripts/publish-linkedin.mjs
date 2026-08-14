@@ -35,7 +35,7 @@ const res = await fetch("https://api.linkedin.com/rest/posts", {
     Authorization: `Bearer ${LINKEDIN_ACCESS_TOKEN}`,
     "Content-Type": "application/json",
     "X-Restli-Protocol-Version": "2.0.0",
-    "LinkedIn-Version": "202506", // ajuste para a versão mais recente se necessário
+    "LinkedIn-Version": "202606", // atualize periodicamente - LinkedIn sunsets versões após ~12 meses
   },
   body: JSON.stringify(body),
 });

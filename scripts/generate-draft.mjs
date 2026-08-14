@@ -59,7 +59,7 @@ Regras para o post:
 - Tamanho ideal: 3 a 6 frases curtas.
 - Responda APENAS com o texto final do post, sem aspas, sem comentários extras.`;
 
-const GEMINI_MODEL = "gemini-2.5-flash"; // modelo do tier gratuito
+const GEMINI_MODEL = "gemini-3.5-flash-lite"; // modelo atual do tier gratuito
 
 const res = await fetch(
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
