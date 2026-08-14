@@ -59,32 +59,3 @@ def close_som_pc(p, stream):
     stream.stop_stream()
     stream.close()
     p.terminate()
-
-
-if __name__ == "__main__":
-    print("Procurando dispositivos de loopback (som do PC)...")
-    disponiveis = scan_dispositivos_loopback()
-
-    print("Dispositivos de loopback encontrados:")
-    for i, nome, _ in disponiveis:
-        print(f"  {i}: {nome}")
-
-    if not disponiveis:
-        print("Nenhum dispositivo de loopback encontrado.")
-        print("Verifique se o pyaudiowpatch foi instalado corretamente.")
-    else:
-        indice_teste = disponiveis[0][0]
-        print(f"Abrindo dispositivo {indice_teste} para teste (Ctrl+C para sair)...")
-        print("Toque algum som no PC e observe o nível de volume abaixo:")
-
-        p, stream, canais, taxa = open_som_pc(indice_teste)
-        try:
-            while True:
-                bloco = capture_frame(stream)
-                volume = np.abs(bloco).mean()
-                barra = "#" * int(volume / 200)
-                print(f"\rVolume: {barra:<50}", end="")
-        except KeyboardInterrupt:
-            print("\nEncerrando teste.")
-        finally:
-            close_som_pc(p, stream)

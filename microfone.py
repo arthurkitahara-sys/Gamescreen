@@ -43,30 +43,3 @@ def capture_frame(stream):
 def close_microfone(stream):
     stream.stop()
     stream.close()
- 
- 
-if __name__ == "__main__":
-    print("Procurando microfones...")
-    disponiveis = scan_microfones()
-    print("Microfones encontrados:")
-    for i, nome in disponiveis:
-        print(f"  {i}: {nome}")
- 
-    if not disponiveis:
-        print("Nenhum microfone encontrado.")
-    else:
-        indice_teste = disponiveis[0][0]
-        print(f"Abrindo microfone {indice_teste} para teste (Ctrl+C para sair)...")
-        print("Fale algo e observe o nível de volume abaixo:")
- 
-        stream = open_microfone(indice_teste)
-        try:
-            while True:
-                bloco = capture_frame(stream)
-                volume = np.abs(bloco).mean()
-                barra = "#" * int(volume * 500)
-                print(f"\rVolume: {barra:<50}", end="")
-        except KeyboardInterrupt:
-            print("\nEncerrando teste.")
-        finally:
-            close_microfone(stream)
